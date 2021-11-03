@@ -4,8 +4,8 @@ import subprocess
 parser = argparse.ArgumentParser(description="SHM_CSR")
 parser.add_argument("input", help='Path of the input file')
 parser.add_argument('-m', '--method', help='Specify the method for the run', default='custom')
-parser.add_argument('-rh', '--result-html', help='Path of the output file', default='$PWD/results/output.html')
-parser.add_argument('-rd', '--result-dir', help='Path where the results will be stored', default='$PWD/results')
+parser.add_argument('result_html', help='Path of the output file' )
+parser.add_argument('result_dir', help='Path where the results will be stored')
 parser.add_argument('title', help='Specify the title for the run')
 parser.add_argument('-if', '--inc-fr', help='Specify ', default="-")
 parser.add_argument('func_filter', help='functionality filter input. Options: productive, unproductive, '
@@ -31,12 +31,9 @@ parser.add_argument('-fa', '--fast', help='input fast process. input: yes, no', 
 
 args = parser.parse_args()
 
-print(args)
-print(args.input)
-print(args.func_filter)
 
 subprocess.call(["bash", "wrapper.sh", args.input, args.method, args.result_html, args.result_dir,
                 args.title, args.inc_fr, args.func_filter, args.unique, args.naive_output, args.naive_output_ca,
-                args.naive_output_cg, args.naive_output_cm, args.naive_output_ce, args.naive_output_ce,
-                args.naive_output_all, args.filter_unique, args.unique_count, args.class_filter, args.fast])
+                args.naive_output_cg, args.naive_output_cm, args.naive_output_ce, args.naive_output_all,
+                 args.filter_unique, args.unique_count, args.class_filter, args.region_filter, args.fast])
 
