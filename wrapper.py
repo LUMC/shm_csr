@@ -7,7 +7,7 @@ parser.add_argument('-m', '--method', help='Specify the method for the run: defa
 parser.add_argument('result_html', help='Path of the output file')
 parser.add_argument('result_dir', help='Path where the results will be stored')
 parser.add_argument('title', help='Specify the title for the run')
-parser.add_argument('-if', '--inc-fr', help='Specify ', default="-")
+parser.add_argument('-if', '--inc-fr', help='including fr1. Default = - ', default="-")
 parser.add_argument('func_filter', help='functionality filter input. Options: productive, unproductive, '
                                         'remove_unknown')
 parser.add_argument('unique', help='Options: "VGene,CDR3.IMGT.AA,best_match_class", "VGene,CDR3.IMGT.AA", '
