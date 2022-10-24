@@ -22,6 +22,27 @@ class_filter=${17}
 empty_region_filter=${18}
 fast=${19}
 
+#echo "$dir"
+#echo "$input"
+#echo "$method"
+#echo "$log"
+#echo "$outdir"
+#echo "$title"
+#echo "$include_fr1"
+#echo "$functionality"
+#echo "$unique"
+#echo "$naive_output"
+#echo "$naive_output_ca"
+#echo "$naive_output_cg"
+#echo "$naive_output_cm"
+#echo "$naive_output_ce"
+#echo "$naive_output_all"
+#echo "$filter_unique"
+#echo "$filter_unique_count"
+#echo "$class_filter"
+#echo "$empty_region_filter"
+#echo "$fast"
+
 #exec 5> debug_output.txt
 #BASH_XTRACEFD="5"
 #PS4='$(date +%s.%N) $LINENO: '
@@ -264,34 +285,34 @@ echo "<div class='tabbertab' title='SHM Overview' style='width: 3000px;'>" >> $o
 
 for func in ${funcs[@]}
 do
-	
+
 	echo "---------------- $func table ----------------"
 	echo "---------------- $func table ----------------<br />" >> $log
-	
+
 	cat $outdir/mutations_${func}.txt $outdir/shm_overview_tandem_row.txt $outdir/hotspot_analysis_${func}.txt > $outdir/data_${func}.txt
-	
+
 	echo "---------------- pattern_plots.r ----------------"
 	echo "---------------- pattern_plots.r ----------------<br />" >> $log
 
 	Rscript $dir/pattern_plots.r $outdir/data_${func}.txt $outdir/aid_motives $outdir/relative_mutations $outdir/absolute_mutations $outdir/shm_overview.txt 2>&1
-	
+
 	echo "<table class='pure-table pure-table-striped'>" >> $output
 	echo "<thead><tr><th>info</th>" >> $output
-	
+
 	if [ "${class_filter}" != "101_101" ] ; then
-	
+
 		for gene in ${genes[@]}
 		do
 			tmp=`cat $outdir/${gene}_${func}_n.txt`
 			echo "<th><a href='matched_${gene}_${func}.txt'>${gene} (N = $tmp)</a></th>" >> $output
 		done
-		
+
 		tmp=`cat $outdir/all_${func}_n.txt`
 		echo "<th><a href='matched_all_${func}.txt'>all (N = $tmp)</a></th>" >> $output
 		tmp=`cat $outdir/unmatched_${func}_n.txt`
 		echo "<th><a href='unmatched.txt'>unmatched (N = ${unmatched_count})</a></th><tr></thead>" >> $output
 
-		while IFS=, read name cax cay caz ca1x ca1y ca1z ca2x ca2y ca2z cgx cgy cgz cg1x cg1y cg1z cg2x cg2y cg2z cg3x cg3y cg3z cg4x cg4y cg4z cmx cmy cmz cex cey cez unx uny unz allx ally allz 
+		while IFS=, read name cax cay caz ca1x ca1y ca1z ca2x ca2y ca2z cgx cgy cgz cg1x cg1y cg1z cg2x cg2y cg2z cg3x cg3y cg3z cg4x cg4y cg4z cmx cmy cmz cex cey cez unx uny unz allx ally allz
 		do
 			if [ "$name" == "FR R/S (ratio)" ] || [ "$name" == "CDR R/S (ratio)" ] || [ "$name" == "Tandems/Expected (ratio)" ] ; then #meh
 				echo "<tr><td>$name</td><td>${cax}/${cay} (${caz})</td><td>${ca1x}/${ca1y} (${ca1z})</td><td>${ca2x}/${ca2y} (${ca2z})</td><td>${cgx}/${cgy} (${cgz})</td><td>${cg1x}/${cg1y} (${cg1z})</td><td>${cg2x}/${cg2y} (${cg2z})</td><td>${cg3x}/${cg3y} (${cg3z})</td><td>${cg4x}/${cg4y} (${cg4z})</td><td>${cmx}/${cmy} (${cmz})</td><td>${cex}/${cey} (${cez})</td><td>${allx}/${ally} (${allz})</td><td>${unx}/${uny} (${unz})</td></tr>" >> $output
@@ -301,11 +322,11 @@ do
 				echo "<tr><td>$name</td><td>${cax}/${cay} (${caz}%)</td><td>${ca1x}/${ca1y} (${ca1z}%)</td><td>${ca2x}/${ca2y} (${ca2z}%)</td><td>${cgx}/${cgy} (${cgz}%)</td><td>${cg1x}/${cg1y} (${cg1z}%)</td><td>${cg2x}/${cg2y} (${cg2z}%)</td><td>${cg3x}/${cg3y} (${cg3z}%)</td><td>${cg4x}/${cg4y} (${cg4z}%)</td><td>${cmx}/${cmy} (${cmz}%)</td><td>${cex}/${cey} (${cez}%)</td><td>${allx}/${ally} (${allz}%)</td><td>${unx}/${uny} (${unz}%)</td></tr>" >> $output
 			fi
 		done < $outdir/data_${func}.txt
-		
+
 	else
 		tmp=`cat $outdir/all_${func}_n.txt`
 		echo "<th><a href='matched_all_${func}.txt'>all (N = $tmp)</a></th>" >> $output
-		
+
 		while IFS=, read name cax cay caz ca1x ca1y ca1z ca2x ca2y ca2z cgx cgy cgz cg1x cg1y cg1z cg2x cg2y cg2z cg3x cg3y cg3z cg4x cg4y cg4z cmx cmy cmz cex cey cez unx uny unz allx ally allz
 		do
 			if [ "$name" == "FR R/S (ratio)" ] || [ "$name" == "CDR R/S (ratio)" ] ; then #meh
@@ -316,7 +337,7 @@ do
 				echo "<tr><td>$name</td><td>${allx}/${ally} (${allz}%)</td></tr>" >> $output
 			fi
 		done < $outdir/data_${func}.txt
-		
+
 	fi
 	echo "</table>" >> $output
 	#echo "<a href='data_${func}.txt'>Download data</a>" >> $output
@@ -356,21 +377,21 @@ for gene in ${genes[@]}
 do
 	echo "<tr>" >> $output
 	echo "<td><h1>${gene}</h1></td>" >> $output
-	
+
 	if [ -e $outdir/transitions_heatmap_${gene}.png ]
 	then
 		echo "<td><a href='transitions_heatmap_${gene}.pdf'><img src='transitions_heatmap_${gene}.png' /></a></td>" >> $output
 	else
 		echo "<td></td>" >> $output
 	fi
-	
+
 	if [ -e $outdir/transitions_stacked_${gene}.png ]
 	then
 		echo "<td><a href='transitions_stacked_${gene}.pdf'><img src='transitions_stacked_${gene}.png' /></a></td>" >> $output
 	else
 		echo "<td></td>" >> $output
 	fi
-	
+
 	echo "<td><table style='border-left-width: 1;' class='pure-table transition-table pure-table-bordered'>" >> $output
 	echo "<tr><td></td><td colspan="5"><center>To</center></td></tr>" >> $output
 	first="true"
@@ -384,7 +405,7 @@ do
 			fi
 	done < $outdir/transitions_${gene}_sum.txt
 	echo "</table></td>" >> $output
-	
+
 	echo "</tr>" >> $output
 done
 
@@ -446,24 +467,24 @@ fi
 
 if [[ "$fast" == "no" ]] ; then
 
-    
+
 
 	echo "---------------- baseline ----------------"
 	echo "---------------- baseline ----------------<br />" >> $log
 	tmp="$PWD"
 
 	mkdir -p $outdir/baseline
-	
+
 	echo "<center><h1>BASELINe</h1>" >> $output
 	header_substring="Based on CDR1, FR2, CDR2, FR3 (27:27:38:55:65:104:-)"
-	
+
 	baseline_boundaries="27:27:38:55:65:104:-"
-	
+
 	if [[ "${empty_region_filter}" == "leader" ]] ; then
 		baseline_boundaries="1:26:38:55:65:104:-"
 		header_substring="Based on FR1, CDR1, FR2, CDR2, FR3 (1:26:38:55:65:104,-)"
 	fi
-	
+
 	echo "<p>${header_substring}</p></center>" >> $output
 
 	mkdir $outdir/baseline/IGA_IGG_IGM
@@ -510,7 +531,7 @@ if [[ "$fast" == "no" ]] ; then
 
 	echo "Cleaning up *.RData files"
 	find $outdir/baseline -name "*.RData" -type f -delete
-	
+
 	if [ -e $outdir/baseline.pdf ]
 	then
 		echo "<embed src='baseline.pdf' width='700px' height='1000px'>" >> $output
@@ -544,7 +565,7 @@ echo "</div>" >> $output #antigen selection tab end
 
 echo "<div class='tabbertab' title='CSR'>" >> $output #CSR tab
 
-if [ -e $outdir/IGA.png ] 
+if [ -e $outdir/IGA.png ]
 then
 	echo "<a href='IGA.pdf'><img src='IGA.png'/></a><br />" >> $output
 fi
@@ -571,56 +592,56 @@ if [[ "$fast" == "no" ]] ; then
 	bash $dir/change_o/makedb.sh $outdir/new_IMGT.txz false false false $outdir/change_o/change-o-db.txt
 	bash $dir/change_o/define_clones.sh bygroup $outdir/change_o/change-o-db.txt gene first ham none min complete 3.0 $outdir/change_o/change-o-db-defined_clones.txt $outdir/change_o/change-o-defined_clones-summary.txt
 	Rscript $dir/change_o/select_first_in_clone.r $outdir/change_o/change-o-db-defined_clones.txt $outdir/change_o/change-o-db-defined_first_clones.txt 2>&1
-	
+
 	mkdir $outdir/new_IMGT_changeo
 	cp $outdir/new_IMGT/* $outdir/new_IMGT_changeo
-	
+
 	Rscript $dir/new_imgt.r $outdir/new_IMGT_changeo $outdir/change_o/change-o-db-defined_first_clones.txt "-" 2>&1
-	
+
 	cd $outdir/new_IMGT_changeo
 	tar -cJf ../new_IMGT_first_seq_of_clone.txz *
 	cd $outdir/change_o
-	
+
 	rm -rf $outdir/new_IMGT_changeo
-	
+
 	Rscript $dir/merge.r $outdir/change_o/change-o-db-defined_clones.txt $outdir/merged.txt "all" "Sequence.ID,best_match" "SEQUENCE_ID" "Sequence.ID" $outdir/change_o/change-o-db-defined_clones.txt 2>&1
 	echo "Rscript $dir/merge.r $outdir/change_o/change-o-db-defined_clones.txt $outdir/$outdir/merged.txt 'all' 'Sequence.ID,best_match' 'Sequence.ID' 'Sequence.ID' '\t' $outdir/change_o/change-o-db-defined_clones.txt 2>&1"
-	
+
 	if [[ $(wc -l < $outdir/new_IMGT_IGA/1_Summary.txt) -gt "1" ]]; then
 		bash $dir/change_o/makedb.sh $outdir/new_IMGT_IGA.txz false false false $outdir/change_o/change-o-db-IGA.txt
 		bash $dir/change_o/define_clones.sh bygroup $outdir/change_o/change-o-db-IGA.txt gene first ham none min complete 3.0 $outdir/change_o/change-o-db-defined_clones-IGA.txt $outdir/change_o/change-o-defined_clones-summary-IGA.txt
 		Rscript $dir/change_o/select_first_in_clone.r $outdir/change_o/change-o-db-defined_clones-IGA.txt $outdir/change_o/change-o-db-defined_first_clones-IGA.txt 2>&1
-		
+
 		mkdir $outdir/new_IMGT_IGA_changeo
 		cp $outdir/new_IMGT/* $outdir/new_IMGT_IGA_changeo
-		
+
 		Rscript $dir/new_imgt.r $outdir/new_IMGT_IGA_changeo $outdir/change_o/change-o-db-defined_first_clones-IGA.txt "-" 2>&1
-		
+
 		cd $outdir/new_IMGT_IGA_changeo
 		tar -cJf ../new_IMGT_IGA_first_seq_of_clone.txz *
-		
+
 		rm -rf $outdir/new_IMGT_IGA_changeo
-		
+
 		cd $outdir/change_o
 	else
 		echo "No IGA sequences" > "$outdir/change_o/change-o-db-defined_clones-IGA.txt"
 		echo "No IGA sequences" > "$outdir/change_o/change-o-defined_clones-summary-IGA.txt"
 	fi
-	
+
 	if [[ $(wc -l < $outdir/new_IMGT_IGG/1_Summary.txt) -gt "1" ]]; then
 		bash $dir/change_o/makedb.sh $outdir/new_IMGT_IGG.txz false false false $outdir/change_o/change-o-db-IGG.txt
 		bash $dir/change_o/define_clones.sh bygroup $outdir/change_o/change-o-db-IGG.txt gene first ham none min complete 3.0 $outdir/change_o/change-o-db-defined_clones-IGG.txt $outdir/change_o/change-o-defined_clones-summary-IGG.txt
 		Rscript $dir/change_o/select_first_in_clone.r $outdir/change_o/change-o-db-defined_clones-IGG.txt $outdir/change_o/change-o-db-defined_first_clones-IGG.txt 2>&1
-		
+
 		mkdir $outdir/new_IMGT_IGG_changeo
 		cp $outdir/new_IMGT/* $outdir/new_IMGT_IGG_changeo
-		
+
 		Rscript $dir/new_imgt.r $outdir/new_IMGT_IGG_changeo $outdir/change_o/change-o-db-defined_first_clones-IGG.txt "-" 2>&1
-		
+
 		cd $outdir/new_IMGT_IGG_changeo
 		tar -cJf ../new_IMGT_IGG_first_seq_of_clone.txz *
 		rm -rf $outdir/new_IMGT_IGG_changeo
-		
+
 		cd $outdir/change_o
 	else
 		echo "No IGG sequences" > "$outdir/change_o/change-o-db-defined_clones-IGG.txt"
@@ -631,17 +652,17 @@ if [[ "$fast" == "no" ]] ; then
 		bash $dir/change_o/makedb.sh $outdir/new_IMGT_IGM.txz false false false $outdir/change_o/change-o-db-IGM.txt
 		bash $dir/change_o/define_clones.sh bygroup $outdir/change_o/change-o-db-IGM.txt gene first ham none min complete 3.0 $outdir/change_o/change-o-db-defined_clones-IGM.txt $outdir/change_o/change-o-defined_clones-summary-IGM.txt
 		Rscript $dir/change_o/select_first_in_clone.r $outdir/change_o/change-o-db-defined_clones-IGM.txt $outdir/change_o/change-o-db-defined_first_clones-IGM.txt 2>&1
-		
+
 		mkdir $outdir/new_IMGT_IGM_changeo
 		cp $outdir/new_IMGT/* $outdir/new_IMGT_IGM_changeo
-		
+
 		Rscript $dir/new_imgt.r $outdir/new_IMGT_IGM_changeo $outdir/change_o/change-o-db-defined_first_clones-IGM.txt "-" 2>&1
-		
+
 		cd $outdir/new_IMGT_IGM_changeo
 		tar -cJf ../new_IMGT_IGM_first_seq_of_clone.txz *
-		
+
 		rm -rf $outdir/new_IMGT_IGM_changeo
-		
+
 		cd $outdir/change_o
 	else
 		echo "No IGM sequences" > "$outdir/change_o/change-o-db-defined_clones-IGM.txt"
@@ -652,17 +673,17 @@ if [[ "$fast" == "no" ]] ; then
 		bash $dir/change_o/makedb.sh $outdir/new_IMGT_IGE.txz false false false $outdir/change_o/change-o-db-IGE.txt
 		bash $dir/change_o/define_clones.sh bygroup $outdir/change_o/change-o-db-IGE.txt gene first ham none min complete 3.0 $outdir/change_o/change-o-db-defined_clones-IGE.txt $outdir/change_o/change-o-defined_clones-summary-IGE.txt
 		Rscript $dir/change_o/select_first_in_clone.r $outdir/change_o/change-o-db-defined_clones-IGE.txt $outdir/change_o/change-o-db-defined_first_clones-IGE.txt 2>&1
-		
+
 		mkdir $outdir/new_IMGT_IGE_changeo
 		cp $outdir/new_IMGT/* $outdir/new_IMGT_IGE_changeo
-		
+
 		Rscript $dir/new_imgt.r $outdir/new_IMGT_IGE_changeo $outdir/change_o/change-o-db-defined_first_clones-IGE.txt "-" 2>&1
-		
+
 		cd $outdir/new_IMGT_IGE_changeo
 		tar -cJf ../new_IMGT_IGE_first_seq_of_clone.txz *
-		
+
 		rm -rf $outdir/new_IMGT_IGE_changeo
-		
+
 		cd $outdir/change_o
 	else
 		echo "No IGE sequences" > "$outdir/change_o/change-o-db-defined_clones-IGE.txt"
@@ -670,7 +691,7 @@ if [[ "$fast" == "no" ]] ; then
 	fi
 
 	cd "$tmp"
-	
+
 	rm -rf $outdir/new_IMGT
 	rm -rf $outdir/new_IMGT_IGA/
 	rm -rf $outdir/new_IMGT_IGA1/
@@ -688,12 +709,12 @@ if [[ "$fast" == "no" ]] ; then
 	function clonality_table {
 		local infile=$1
 		local outfile=$2
-		
+
 		echo "<table class='pure-table pure-table-striped'>" >> $outfile
 		echo "<thead><tr><th>Clone size</th><th>Nr of clones</th><th>Nr of sequences</th></tr></thead>" >> $outfile
-		
+
 		first='true'
-		
+
 		while read size clones seqs
 		do
 			if [[ "$first" == "true" ]]; then
@@ -702,7 +723,7 @@ if [[ "$fast" == "no" ]] ; then
 			fi
 			echo "<tr><td>$size</td><td>$clones</td><td>$seqs</td></tr>" >> $outfile
 		done < $infile
-		
+
 		echo "</table>" >> $outfile
 	}
 	echo "<div class='tabber'>" >> $output
@@ -730,12 +751,12 @@ if [[ "$fast" == "no" ]] ; then
 	echo "<div class='tabbertab' title='Overlap' style='width: 7000px;'>" >> $output
 	cat "$outdir/sequence_overview/index.html" | sed -e 's:</td>:</td>\n:g' | sed "s:href='\(.*\).html:href='sequence_overview/\1.html:g" >> $output # rewrite href to 'sequence_overview/..."
 	echo "</div>" >> $output
-	
+
 	echo "</div>" >> $output #clonality tabber end
-	
+
 	echo "<br />" >> $output
 	cat $dir/shm_clonality.htm >> $output
-	
+
 	echo "</div>" >> $output #clonality tab end
 
 fi
@@ -868,7 +889,7 @@ cat $dir/shm_downloads.htm >> $output
 
 echo "</div>" >> $output #downloads tab end
 
-echo "</div>" >> $output #tabs end 
+echo "</div>" >> $output #tabs end
 
 echo "</html>" >> $output
 
@@ -941,7 +962,6 @@ done < "$filename"
 
 echo "---------------- Done! ----------------"
 echo "---------------- Done! ----------------<br />" >> $outdir/log.html
-
 
 
 
