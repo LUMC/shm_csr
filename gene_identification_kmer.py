@@ -88,17 +88,22 @@ def match_sequence(sequence, class_profiles: Dict[str, Set[str]],
     # Sort so the highest match is on top
     matches.sort(reverse=True)
     match_score, best_gene = matches[0]
+    if match_score == 0:
+        return "IGA1", 0, 0
     subclasses = subclass_profiles.get(best_gene)
     if not subclasses:
-        return best_gene, 100, match_score / len(class_profiles[best_gene])
+        return best_gene, 1, match_score / len(class_profiles[best_gene])
     subclass_matches = [
         (len(profile & subclass_profile), subclass)
-        for subclass, subclass_profile in subclasses
+        for subclass, subclass_profile in subclasses.items()
     ]
     subclass_matches.sort(reverse=True)
     subclass_match, best_subclass = subclass_matches[0]
-    subclass_score = subclass_match / len(subclasses[best_subclass])
-    return best_subclass, subclass_score, subclass_score
+    max_matches = len(subclasses[best_subclass])
+    subclass_score = subclass_match / max_matches
+    # Use min so there is not above 100% score
+    class_score = min(match_score, max_matches) / max_matches
+    return best_subclass, class_score, subclass_score
 
 
 def generate_sequence_and_id_from_summary(summary_file: str
@@ -125,20 +130,20 @@ def main():
     parser.add_argument("--output",
                         help="The annotated output file to be merged back "
                              "with the summary file")
+    parser.add_argument("-k", "--kmer-size", help="The size of k",
+                        type=int, default=7)
     args = parser.parse_args()
+
+    class_profiles, subclass_profiles = immuno_gene_profiles(args.kmer_size)
 
     with open(args.output, "wt") as output:
         output.write("Sequence ID\tbest_match\tnt_hit_percentage\t"
                      "chunk_hit_percentage\tstart_locations\n")
         for id, sequence in generate_sequence_and_id_from_summary(args.input):
-            best_match, subclass_hits, class_hits, start_locations = \
-                match_sequence(sequence, compiledregex)
-            variable_nucs = subclass_vars[best_match]
-            if variable_nucs:
-                subclass_percentage = round(subclass_hits * 100 /
-                                            variable_nucs)
-            else:
-                subclass_percentage = 100
-            class_percentage = round(class_hits * 100 / class_chunks[best_match])
-            output.write(f"{id}\t{best_match}\t{subclass_percentage}\t"
-                         f"{class_percentage}\t{start_locations}\n")
+            best_match, subclass_score, class_score = \
+                match_sequence(sequence, class_profiles, subclass_profiles)
+            output.write(f"{id}\t{best_match}\t{round(subclass_score * 100)}\t"
+                         f"{round(class_score * 100)}\t[]\n")
+
+if __name__ ==  "__main__":
+    main()
