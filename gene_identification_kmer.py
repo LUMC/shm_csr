@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
-from collections import Counter
-from typing import Dict, Iterator, List, Tuple
+import argparse
+from typing import Dict, Iterator, List, Set, Tuple
 
 
-def kmer_profile(sequence: str, k: int):
-    kmers = (sequence[i:i+k] for i in range(len(sequence) - k))
-    return Counter(kmers)
+def generate_kmers(sequence: str, k: int) -> Iterator[str]:
+    return (sequence[i:i+k] for i in range(len(sequence) - k))
 
 
-def immuno_gene_profiles():
+def distinct_kmers(sequence: str, k: int) -> Set[str]:
+    return set(generate_kmers(sequence, k))
+
+
+def immuno_gene_profiles(k: int) -> Tuple[Dict[str, Set[str]],
+                                          Dict[str, Dict[str, Set[str]]]]:
     ca = "catccccgaccagccccaaggtcttcccgctgagcctctgcagcacccagccagatgggaacgtggtcatcgcctgcctgg"
     cg = "ctccaccaagggcccatcggtcttccccctggcaccctcctccaagagcacctctgggggcacagcggcc"
     ce = "gcctccacacagagcccatccgtcttccccttgacccgctgctgcaaaaacattccctcc"
@@ -32,7 +36,69 @@ def immuno_gene_profiles():
         return "".join(c if i not in mutations else mutations[i]
                        for i, c in enumerate(sequence))
 
-    iga1 = mutate(ca, ca1_mutations)
+    ca1 = mutate(ca, ca1_mutations)
+    ca2 = mutate(ca, ca2_mutations)
+    cg1 = mutate(cg, cg1_mutations)
+    cg2 = mutate(cg, cg2_mutations)
+    cg3 = mutate(cg, cg3_mutations)
+    cg4 = mutate(cg, cg4_mutations)
+
+    iga1_profile = distinct_kmers(ca1, k)
+    iga2_profile = distinct_kmers(ca2, k)
+    igg1_profile = distinct_kmers(cg1, k)
+    igg2_profile = distinct_kmers(cg2, k)
+    igg3_profile = distinct_kmers(cg3, k)
+    igg4_profile = distinct_kmers(cg4, k)
+    ige_profile = distinct_kmers(ce, k)
+    igm_profile = distinct_kmers(cm, k)
+    # Combine all subclass profiles to provide the best matching for the
+    # entire class
+    iga_profile = iga1_profile | iga2_profile
+    igg_profile = igg1_profile | igg2_profile | igg3_profile | igg4_profile
+    class_profiles = {
+        "IGA": iga_profile,
+        "IGE": ige_profile,
+        "IGG": igg_profile,
+        "IGM": igm_profile,
+    }
+    subclass_profiles = {
+        "IGA": {
+            "IGA1": iga1_profile,
+            "IGA2": iga2_profile,
+        },
+        "IGG": {
+            "IGG1": igg1_profile,
+            "IGG2": igg2_profile,
+            "IGG3": igg3_profile,
+            "IGG4": igg4_profile,
+        }
+    }
+    return class_profiles, subclass_profiles
+
+
+def match_sequence(sequence, class_profiles: Dict[str, Set[str]],
+                   subclass_profiles: Dict[str, Dict[str, Set[str]]]):
+    # retrieve k from the length of the first item in the set for IGA
+    k = len(next(iter(class_profiles["IGA"])))
+    profile = distinct_kmers(sequence, k)
+    matches = [
+        (len(profile & gene_profile), gene)
+        for gene, gene_profile in class_profiles.items()
+    ]
+    # Sort so the highest match is on top
+    matches.sort(reverse=True)
+    match_score, best_gene = matches[0]
+    subclasses = subclass_profiles.get(best_gene)
+    if not subclasses:
+        return best_gene, 100, match_score / len(class_profiles[best_gene])
+    subclass_matches = [
+        (len(profile & subclass_profile), subclass)
+        for subclass, subclass_profile in subclasses
+    ]
+    subclass_matches.sort(reverse=True)
+    subclass_match, best_subclass = subclass_matches[0]
+    subclass_score = subclass_match / len(subclasses[best_subclass])
+    return best_subclass, subclass_score, subclass_score
 
 
 def generate_sequence_and_id_from_summary(summary_file: str
