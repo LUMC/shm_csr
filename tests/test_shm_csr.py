@@ -49,8 +49,31 @@ def ignore_files(src, files):
         return files
     return ()
 
-@pytest.fixture(scope="module")
-def shm_csr_result():
+
+def run_shm_csr(
+    input=str(CONTROL_NWK377_PB_IGHC_MID1_40nt_2),
+    infile_name = "input_data",
+    functionality = "productive",
+    unique = "Sequence.ID",
+    naive_output = "no",
+    naive_output_ca = "None",
+    naive_output_cg = "None",
+    naive_output_cm = "None",
+    naive_output_ce = "None",
+    naive_output_all = "None",
+    naive_output_igm_naive = "None",
+    naive_output_igm_naive_memory = "None",
+    filter_unique = "remove",
+    filter_unique_count = '2',
+    class_filter = '70_70',
+    empty_region_filter = 'FR1',
+    # Skip baseline and changeo by default. These tools cannot be modified
+    # anyway and take most of the test time to execute. The environment
+    # variable can be set to "no" on the CI so the code path is tested
+    # at the time a PR is ready.
+    run_changeo = "yes" if os.environ.get("SHM_CSR_FAST") == "no" else "no",
+    run_baseline = "yes" if os.environ.get("SHM_CSR_FAST") == "no" else "no",
+):
     temp_dir = Path(tempfile.mkdtemp())
     tool_dir = temp_dir / "shm_csr"
     shutil.copytree(
@@ -62,29 +85,8 @@ def shm_csr_result():
     output_dir = temp_dir / "outputs"
     output_dir.mkdir(parents=True)
     wrapper = str(tool_dir / "wrapper.sh")
-    input = str(CONTROL_NWK377_PB_IGHC_MID1_40nt_2)
     out_files_path = output_dir / "results"
     out_file = out_files_path / "result.html"
-    infile_name = "input_data"
-    functionality = "productive"
-    unique = "Sequence.ID"
-    naive_output = "no"
-    naive_output_ca = "None"
-    naive_output_cg = "None"
-    naive_output_cm = "None"
-    naive_output_ce = "None"
-    naive_output_all = "None"
-    naive_output_igm_naive = "None"
-    naive_output_igm_naive_memory = "None"
-    filter_unique = "remove"
-    filter_unique_count = '2'
-    class_filter = '70_70'
-    empty_region_filter = 'FR1'
-    # Skip baseline and changeo by default. These tools cannot be modified
-    # anyway and take most of the test time to execute. The environment
-    # variable can be set to "no" on the CI so the code path is tested
-    # at the time a PR is ready.
-    fast = os.environ.get("SHM_CSR_FAST", "yes")
     cmd = [
         "bash",
         wrapper,
@@ -108,7 +110,8 @@ def shm_csr_result():
         filter_unique_count,
         class_filter,
         empty_region_filter,
-        fast
+        run_changeo,
+        run_baseline
     ]
     docker_cmd = ["docker", "run", "-v", f"{temp_dir}:{temp_dir}",
                   "--rm",  # Remove container after running
@@ -128,7 +131,12 @@ def shm_csr_result():
         with open(temp_dir / "stdout", "wt") as stdout_file:
             subprocess.run(docker_cmd, cwd=working_dir, stdout=stdout_file,
                            stderr=stderr_file, check=True)
-    yield Path(out_files_path)
+    return Path(out_files_path)
+
+
+@pytest.fixture(scope="module")
+def shm_csr_result():
+    yield run_shm_csr()
 
 
 def test_check_output(shm_csr_result):
@@ -157,3 +165,16 @@ def test_nt_overview(shm_csr_result):
                   ) as validate_h:
             for line in result_h:
                 assert line == validate_h.readline()
+
+
+def test_baseline_succeeds():
+    run_shm_csr(
+        functionality="unproductive",
+        empty_region_filter="None",
+        filter_unique="no",
+        unique="VGene,DGene,JGene,CDR3.IMGT.seq",
+        class_filter="101_101_IGA",
+        naive_output="yes",
+        run_baseline="yes",
+        run_changeo="yes",
+    )

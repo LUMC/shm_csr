@@ -1,4 +1,5 @@
 #!/bin/bash
+
 dir="$(cd "$(dirname "$0")" && pwd)"
 
 testID=$1
@@ -79,14 +80,16 @@ Rscript --verbose $dir/Baseline_Main.r $testID $species $substitutionModel $muta
 
 echo "$workdir/${outID}.txt"
 
-rows=`tail -n +2 $workdir/${outID}.txt | grep -v "All sequences combined" | grep -n 'Group' | grep -Eoh '^[0-9]+' | tr '\n' ' '`
-rows=($rows)
-#unset rows[${#rows[@]}-1]
+if [[ -f "$workdir/${outID}.txt" ]]
+then
+  rows=`tail -n +2 $workdir/${outID}.txt | grep -v "All sequences combined" | grep -n 'Group' | grep -Eoh '^[0-9]+' | tr '\n' ' '`
+  rows=($rows)
+  #unset rows[${#rows[@]}-1]
 
-cd $dir
-Rscript --verbose $dir/comparePDFs.r $workdir/${outID}.RData $output ${rows[@]} 2>&1
-cp $workdir/result.txt ${output_table}
-
+  cd $dir
+  Rscript --verbose $dir/comparePDFs.r $workdir/${outID}.RData $output ${rows[@]} 2>&1
+  cp $workdir/result.txt ${output_table}
+fi
 
 
 
