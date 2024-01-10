@@ -24,5 +24,7 @@ jobs:
           SHM_CSR_FAST: "no"
       - name: Print stdout
         run: bash -c 'cat /tmp/tmp*/stdout'
+        if: failure()
       - name: Print stderr
         run: bash -c 'cat /tmp/tmp*/stderr'
+        if: failure()
