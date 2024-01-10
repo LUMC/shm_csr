@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e -o pipefail
-
 dir="$(cd "$(dirname "$0")" && pwd)"
 
 testID=$1
