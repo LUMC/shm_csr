@@ -1,4 +1,4 @@
-version 1.10.0-dev
+version 1.10.0
 ------------------
 + Fix crashing baseline when only unproductive sequences are present.
 + Replace "fast" option with options to toggle baseline and Change-O indidually.
