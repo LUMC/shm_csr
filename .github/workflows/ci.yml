@@ -22,3 +22,7 @@ jobs:
           # Make sure everything works correctly by default.
           # SHM_CSR_FAST: yes runs by default on the local test.
           SHM_CSR_FAST: "no"
+      - name: Print stdout
+        run: bash -c 'cat /tmp/tmp*/stdout'
+      - name: Print stderr
+        run: bash -c 'cat /tmp/tmp*/stderr'
