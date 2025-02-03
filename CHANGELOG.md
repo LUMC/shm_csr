@@ -1,3 +1,7 @@
+version 1.10.1
+------------------
++ Fix a bug that is caused by a wrong bash variable.
+
 version 1.10.0
 ------------------
 + Fix crashing baseline when only unproductive sequences are present.
