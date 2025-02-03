@@ -837,7 +837,7 @@ mv $log $outdir/log.html
 echo "<html><center><h1><a href='index.html'>Click here for the results</a></h1>Tip: Open it in a new tab (middle mouse button or right mouse button -> 'open in new tab' on the link above)<br />" > $log
 echo "<table border = 1>" >> $log
 echo "<thead><tr><th>Info</th><th>Sequences</th><th>Percentage</th></tr></thead>" >> $log
-tIFS="$TMP"
+tIFS="$IFS"
 IFS=$'\t'
 while read step seq perc
 	do
